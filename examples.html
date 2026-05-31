@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemples Avancés - Expérience Immersive 3D</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+    <style>
+        .example-section {
+            padding: 3rem 2rem;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #667eea;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .example-title {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas-3d"></canvas>
+
+    <div id="content-container">
+        <section class="section example-section">
+            <h1 class="section-title fade-in">Exemples Avancés</h1>
+            <p class="fade-in-up" style="animation-delay: 0.2s;">
+                Découvrez comment utiliser les fonctionnalités avancées de l'expérience immersive.
+            </p>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">1. Animations Personnalisées au Scroll</h2>
+                <p class="fade-in-up">
+                    Vous pouvez créer des animations complexes qui réagissent au scroll:
+                </p>
+                <div class="code-block">
+// Créer un effet de parallax personnalisé
+ScrollEffectManager.createScrollParallax(element, 0.5);
+
+// Créer un effet de fade au scroll
+ScrollEffectManager.createScrollFade(element);
+
+// Créer un effet de scale au scroll
+ScrollEffectManager.createScrollScale(element, 0.8, 1.2);
+
+// Créer un effet de rotation au scroll
+ScrollEffectManager.createScrollRotate(element, 180);
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">2. Gestion du Parallax Dynamique</h2>
+                <p class="fade-in-up">
+                    Ajoutez et retirez des éléments parallax dynamiquement:
+                </p>
+                <div class="code-block">
+// Ajouter un nouvel élément parallax
+parallaxManager.addElement(document.querySelector('.mon-element'), 0.5);
+
+// Modifier la force du parallax
+parallaxManager.setParallaxStrength(25);
+
+// Retirer un élément parallax
+parallaxManager.removeElement(document.querySelector('.mon-element'));
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">3. Ajouter des Objets 3D</h2>
+                <p class="fade-in-up">
+                    Créez et ajoutez des géométries 3D personnalisées:
+                </p>
+                <div class="code-block">
+// Créer une géométrie personnalisée
+const geometry = new THREE.BoxGeometry(15, 15, 15);
+const material = new THREE.MeshPhongMaterial({
+    color: 0xff00ff,
+    emissive: 0x660066
+});
+
+// Ajouter à la scène
+scene3D.addObject(geometry, material, new THREE.Vector3(0, 0, 0));
+
+// Créer un ripple effect au clic
+scene3D.createRipple(new THREE.Vector3(0, 0, 0));
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">4. Contrôle de la Scène 3D</h2>
+                <p class="fade-in-up">
+                    Contrôlez l'animation 3D en temps réel:
+                </p>
+                <div class="code-block">
+// Mettre en pause la scène
+scene3D.pause();
+
+// Reprendre la scène
+scene3D.resume();
+
+// Changer la couleur de fond
+scene3D.changeBackgroundColor(0xff0000);
+
+// Retirer un objet
+scene3D.removeObject(monObjet);
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">5. Événements Personnalisés</h2>
+                <p class="fade-in-up">
+                    Écoutez les événements de révélation d'éléments:
+                </p>
+                <div class="code-block">
+// Écouter quand un élément est révélé
+document.addEventListener('reveal', (e) => {
+    console.log('Élément révélé:', e.detail);
+});
+
+// Ajouter une classe avec délai
+Utils.addClassWithDelay(element, 'my-class', 500);
+
+// Lancer une animation de valeur
+Utils.animateValue(0, 100, 1000, (value) => {
+    console.log('Valeur actuelle:', value);
+});
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">6. Utilitaires Avancés</h2>
+                <p class="fade-in-up">
+                    Utilisez les fonctions utilitaires pour des calculs avancés:
+                </p>
+                <div class="code-block">
+// Normaliser une valeur
+const normalized = Utils.normalize(50, 0, 100); // 0.5
+
+// Interpolation linéaire (lerp)
+const interpolated = Utils.lerp(0, 100, 0.5); // 50
+
+// Limiter une valeur
+const clamped = Utils.clamp(150, 0, 100); // 100
+
+// Obtenir les dimensions du viewport
+const viewport = Utils.getViewportDimensions();
+
+// Calculer la direction du mouvement
+const direction = Utils.getMouseDirection(0, 0, 10, 10);
+
+// Throttle une fonction
+const throttled = Utils.throttle(() => console.log('Throttled'), 1000);
+window.addEventListener('scroll', throttled);
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">7. Configuration Avancée</h2>
+                <p class="fade-in-up">
+                    Personnalisez les paramètres globaux:
+                </p>
+                <div class="code-block">
+// Accédez à la configuration
+console.log(window.app.getConfig());
+
+// Mettez à jour la configuration
+window.app.updateConfig({
+    parallaxStrength: 30
+});
+
+// Activez le debug mode
+window.app.toggleDebugMode(true);
+
+// Afficher les statistiques de performance
+window.showStats();
+
+// Naviguer vers une section
+window.goto('section-5');
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">8. Classes d'Animation CSS</h2>
+                <p class="fade-in-up">
+                    Appliquez les classes d'animation CSS préconstruites:
+                </p>
+                <div class="code-block">
+<!-- Animations d'entrée -->
+<div class="fade-in">Fade in</div>
+<div class="fade-in-up">Fade in up</div>
+<div class="scale-in">Scale in</div>
+<div class="rotate-in">Rotate in</div>
+
+<!-- Animations continues -->
+<div class="float">Floating</div>
+<div class="pulse">Pulsing</div>
+<div class="bounce">Bouncing</div>
+
+<!-- Animations au survol -->
+<div class="hover-scale">Hover to scale</div>
+<div class="hover-lift">Hover to lift</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">9. Storytelling Interactif</h2>
+                <p class="fade-in-up">
+                    Créez une expérience narrative immersive:
+                </p>
+                <div class="code-block">
+<div class="story-chapter fade-in-left">
+    <span class="chapter-number">I</span>
+    <h3>Titre du Chapitre</h3>
+    <p>Description du chapitre...</p>
+</div>
+
+<div class="story-chapter fade-in-right" style="animation-delay: 0.2s;">
+    <span class="chapter-number">II</span>
+    <h3>Chapitre Suivant</h3>
+    <p>Plus de contenu narratif...</p>
+</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section example-section">
+            <div>
+                <h2 class="example-title fade-in">10. Commandes Console</h2>
+                <p class="fade-in-up">
+                    Utilisez ces commandes dans la console du navigateur:
+                </p>
+                <div class="code-block">
+// Afficher les statistiques
+showStats()
+
+// Naviguer vers une section
+goto('section-id')
+
+// Accéder à l'instance de l'app
+window.app
+
+// Accéder à la scène 3D
+window.scene3D
+
+// Accéder au gestionnaire de parallax
+window.parallaxManager
+
+// Accéder au gestionnaire d'effets de scroll
+window.scrollEffectManager
+
+// Accéder aux utilitaires
+window.Utils
+
+// Afficher les crédits
+window.showCredits()
+                </div>
+            </div>
+        </section>
+
+        <section class="section cta-section">
+            <div class="cta-container">
+                <h2>Prêt à Créer?</h2>
+                <p>Utilisez ces exemples pour créer votre propre expérience immersive.</p>
+                <button class="cta-button large" data-scroll-to="hero">Retour au Début</button>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2026 Exemples Avancés - Expérience Immersive 3D</p>
+        </footer>
+    </div>
+
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/parallax.js"></script>
+    <script src="assets/js/scrollEffects.js"></script>
+    <script src="assets/js/3d-scene.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/config.js"></script>
+
+    <script>
+        // Exemples supplémentaires
+        window.addEventListener('load', () => {
+            console.log('%c✨ Page des Exemples Avancés chargée!', 'color: #667eea; font-size: 14px; font-weight: bold;');
+            console.log('Tapez: showStats() pour voir les métriques');
+            console.log('Tapez: window.app.toggleDebugMode(true) pour le debug');
+        });
+    </script>
+</body>
+</html>
