@@ -2,6 +2,7 @@
   "name": "acces-claude-3d-immersive",
   "version": "1.0.0",
   "description": "Une base complète pour créer des sites et applications immersives et en 3D",
+  "homepage": "https://eydendubreuil-com.github.io/Acces-Claude-site",
   "main": "index.html",
   "scripts": {
     "start": "python -m http.server 8000",
@@ -13,12 +14,15 @@
     "3d",
     "immersive",
     "threejs",
-    "animations",
+    "webgl",
+    "interactive",
+    "immersive-design",
     "parallax",
     "scroll-effects",
-    "storytelling"
+    "storytelling",
+    "static-site"
   ],
-  "author": "Your Name",
+  "author": "eydendubreuil-com",
   "license": "MIT",
   "devDependencies": {
     "live-server": "^1.2.1",
