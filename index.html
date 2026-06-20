@@ -1,169 +1,918 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expérience Immersive 3D</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/animations.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="COSMOS — Voyage immersif à travers l'Univers : système solaire 3D interactif, histoire du Big Bang, Voie Lactée, formation de la Terre et échelles cosmiques." />
+<title>COSMOS — Voyage immersif à travers l'Univers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   COSMOS — Design System
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#05060f;
+  --bg-soft:#0a0c1c;
+  --panel:rgba(12,14,30,0.72);
+  --panel-solid:#0c0e1e;
+  --line:rgba(120,140,200,0.14);
+  --cyan:#4fc3f7;
+  --cyan-bright:#7fdcff;
+  --purple:#9c6cff;
+  --gold:#f5c842;
+  --pink:#ff5e8a;
+  --green:#5ed6a0;
+  --orange:#ffa726;
+  --text:#e8ebf5;
+  --muted:#9aa2bd;
+  --muted-dim:#646b88;
+  --grad: linear-gradient(120deg,#7fdcff 0%,#9c6cff 50%,#ff5e8a 100%);
+  --grad-cyan: linear-gradient(120deg,#7fdcff,#4f8cff);
+  --radius:16px;
+  --shadow:0 20px 60px -20px rgba(0,0,0,0.7);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  line-height:1.7;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body.no-scroll{overflow:hidden}
+h1,h2,h3,.display{font-family:'Orbitron',sans-serif;font-weight:700;line-height:1.1}
+a{color:inherit;text-decoration:none}
+canvas{display:block}
+::selection{background:rgba(124,220,255,0.3)}
+
+/* ── Scrollbar ───────────────────────────── */
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:#05060f}
+::-webkit-scrollbar-thumb{background:linear-gradient(#4fc3f7,#9c6cff);border-radius:10px;border:2px solid #05060f}
+
+/* ── Global star background ──────────────── */
+#space-bg{position:fixed;inset:0;z-index:-2;background:radial-gradient(ellipse at 50% 0%,#0d1030 0%,#05060f 55%,#020308 100%)}
+#bg-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(800px 600px at 80% 10%,rgba(156,108,255,0.12),transparent 60%),
+    radial-gradient(700px 500px at 10% 60%,rgba(79,195,247,0.10),transparent 60%),
+    radial-gradient(600px 600px at 60% 90%,rgba(255,94,138,0.08),transparent 60%);
+}
+
+/* ── Scroll progress ─────────────────────── */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;
+  background:var(--grad);box-shadow:0 0 12px rgba(124,220,255,0.6)}
+
+/* ── Loading ─────────────────────────────── */
+#loader{position:fixed;inset:0;z-index:1000;background:#05060f;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:2rem;
+  transition:opacity .8s ease,visibility .8s}
+#loader.done{opacity:0;visibility:hidden}
+.loader-logo{font-family:'Orbitron';font-size:clamp(2rem,7vw,4rem);font-weight:900;
+  letter-spacing:.4em;background:var(--grad);-webkit-background-clip:text;
+  background-clip:text;-webkit-text-fill-color:transparent;animation:pulse 2.4s infinite}
+.loader-bar{width:240px;height:2px;background:rgba(255,255,255,.1);overflow:hidden;border-radius:2px}
+.loader-fill{height:100%;width:0;background:var(--grad);transition:width .3s}
+.loader-txt{font-size:.7rem;letter-spacing:.35em;color:var(--muted-dim);text-transform:uppercase}
+@keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4) drop-shadow(0 0 24px rgba(124,220,255,.5))}}
+
+/* ── Header / Nav ────────────────────────── */
+header{position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem clamp(1rem,4vw,3rem);
+  transition:background .4s,backdrop-filter .4s,border-color .4s;
+  border-bottom:1px solid transparent}
+header.scrolled{background:rgba(5,6,15,.78);backdrop-filter:blur(16px);border-color:var(--line)}
+.brand{font-family:'Orbitron';font-weight:900;font-size:1.25rem;letter-spacing:.32em;
+  display:flex;align-items:center;gap:.6rem}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--grad);
+  box-shadow:0 0 14px var(--cyan);animation:pulse 3s infinite}
+.brand span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+nav{display:flex;gap:.3rem;align-items:center}
+nav a{font-size:.82rem;letter-spacing:.04em;color:var(--muted);padding:.5rem .85rem;
+  border-radius:8px;transition:color .25s,background .25s;font-weight:500;white-space:nowrap}
+nav a:hover{color:var(--text);background:rgba(255,255,255,.05)}
+nav a.active{color:var(--cyan-bright)}
+nav a.cta{background:rgba(79,195,247,.12);border:1px solid rgba(79,195,247,.3);color:var(--cyan-bright)}
+nav a.cta:hover{background:rgba(79,195,247,.2)}
+.burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px}
+.burger span{width:24px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
+
+/* ── Layout ──────────────────────────────── */
+section{position:relative;padding:clamp(4rem,10vh,8rem) clamp(1.2rem,5vw,3rem)}
+.wrap{max-width:1200px;margin:0 auto;width:100%}
+.eyebrow{font-family:'Orbitron';font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:1rem;display:flex;align-items:center;gap:.7rem}
+.eyebrow::before{content:'';width:28px;height:1px;background:var(--cyan);opacity:.6}
+.section-title{font-size:clamp(1.8rem,4.5vw,3rem);margin-bottom:1.1rem;letter-spacing:.01em}
+.section-lead{color:var(--muted);max-width:620px;font-size:1.05rem;margin-bottom:3rem}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* ── Reveal animation ────────────────────── */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}.reveal.d4{transition-delay:.4s}
+
+/* ═══ HERO ═══════════════════════════════ */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding-top:6rem}
+.hero-tag{font-family:'Orbitron';font-size:.78rem;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(79,195,247,.3);padding:.5rem 1.2rem;border-radius:40px;
+  margin-bottom:2rem;background:rgba(79,195,247,.06)}
+.hero-title{font-size:clamp(3.5rem,16vw,11rem);font-weight:900;letter-spacing:.06em;
+  background:linear-gradient(135deg,#fff 0%,#7fdcff 35%,#9c6cff 70%,#ff5e8a 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 40px rgba(124,220,255,.25));line-height:.95}
+.hero-sub{font-size:clamp(1rem,2.4vw,1.4rem);color:var(--muted);max-width:600px;margin:1.5rem auto 0;font-weight:300}
+.hero-sub strong{color:var(--text);font-weight:600}
+.hero-btns{display:flex;gap:1rem;margin-top:2.6rem;flex-wrap:wrap;justify-content:center}
+.btn{font-family:'Orbitron';font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.95rem 2rem;border-radius:10px;cursor:pointer;border:none;transition:.3s;font-weight:500;
+  display:inline-flex;align-items:center;gap:.6rem}
+.btn-primary{background:var(--grad-cyan);color:#04121f;font-weight:700}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 40px -12px rgba(79,140,255,.6)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--line)}
+.btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(124,220,255,.4)}
+.scroll-cue{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;
+  flex-direction:column;align-items:center;gap:.5rem;color:var(--muted-dim);font-size:.65rem;
+  letter-spacing:.3em;text-transform:uppercase;animation:bob 2.4s infinite}
+.scroll-cue .mouse{width:22px;height:36px;border:1.5px solid var(--muted-dim);border-radius:12px;position:relative}
+.scroll-cue .mouse::after{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  width:3px;height:7px;border-radius:3px;background:var(--cyan);animation:wheel 2s infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+@keyframes wheel{0%{opacity:1;top:6px}60%{opacity:0;top:16px}100%{opacity:0}}
+
+/* ── Stat bar ────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:4.5rem;
+  background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  max-width:900px;width:100%}
+.stat{background:rgba(8,10,22,.7);padding:1.6rem 1rem;text-align:center}
+.stat-num{font-family:'Orbitron';font-size:clamp(1.4rem,3.5vw,2.2rem);font-weight:700;color:var(--cyan-bright)}
+.stat-lbl{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:.4rem}
+
+/* ── Portal cards ────────────────────────── */
+.portals{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.2rem}
+.portal{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:2rem;backdrop-filter:blur(8px);transition:.4s;cursor:pointer;position:relative;overflow:hidden}
+.portal::before{content:'';position:absolute;inset:0;opacity:0;transition:.4s;
+  background:radial-gradient(400px 200px at 50% 0%,var(--c,rgba(79,195,247,.15)),transparent 70%)}
+.portal:hover{transform:translateY(-6px);border-color:var(--bc,rgba(79,195,247,.4))}
+.portal:hover::before{opacity:1}
+.portal-ico{font-size:2rem;margin-bottom:1rem}
+.portal h3{font-size:1.15rem;margin-bottom:.6rem;letter-spacing:.02em}
+.portal p{color:var(--muted);font-size:.9rem;margin-bottom:1.2rem}
+.portal .go{font-family:'Orbitron';font-size:.72rem;letter-spacing:.15em;color:var(--cyan-bright);text-transform:uppercase}
+
+/* ═══ SOLAR SYSTEM ═══════════════════════ */
+#solar-stage{position:relative;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  background:radial-gradient(ellipse at center,rgba(10,14,34,.5),rgba(3,4,10,.7));
+  height:min(72vh,640px);touch-action:pan-y}
+#solar-canvas{width:100%;height:100%;cursor:grab}
+#solar-canvas:active{cursor:grabbing}
+.solar-hint{position:absolute;top:1rem;left:1rem;font-size:.72rem;letter-spacing:.08em;color:var(--muted);
+  background:rgba(5,6,15,.6);padding:.45rem .8rem;border-radius:8px;border:1px solid var(--line);pointer-events:none}
+.solar-tools{position:absolute;bottom:1rem;left:1rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.tool-btn{width:38px;height:38px;border-radius:9px;background:rgba(5,6,15,.7);border:1px solid var(--line);
+  color:var(--text);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.25s}
+.tool-btn:hover{border-color:var(--cyan);color:var(--cyan-bright)}
+.speed-wrap{display:flex;align-items:center;gap:.6rem;background:rgba(5,6,15,.7);border:1px solid var(--line);
+  padding:.4rem .9rem;border-radius:9px}
+.speed-wrap label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:90px;height:3px;background:rgba(255,255,255,.18);border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 8px rgba(79,195,247,.7)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border:none;border-radius:50%;background:var(--cyan);cursor:pointer}
+.fs-link{position:absolute;top:1rem;right:1rem;font-family:'Orbitron';font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--cyan-bright);background:rgba(5,6,15,.6);padding:.5rem .9rem;
+  border-radius:8px;border:1px solid rgba(79,195,247,.3);transition:.25s}
+.fs-link:hover{background:rgba(79,195,247,.18)}
+/* planet info panel */
+#planet-info{position:absolute;top:0;right:0;height:100%;width:min(370px,85%);
+  background:rgba(7,9,20,.94);backdrop-filter:blur(16px);border-left:1px solid var(--line);
+  padding:2rem 1.8rem;transform:translateX(105%);transition:transform .55s cubic-bezier(.16,1,.3,1);
+  overflow-y:auto;z-index:5}
+#planet-info.open{transform:none}
+#planet-info .close{position:absolute;top:1rem;right:1.1rem;background:none;border:none;color:var(--muted);
+  font-size:1.3rem;cursor:pointer}
+#planet-info .close:hover{color:#fff}
+.pi-badge{width:84px;height:84px;border-radius:50%;margin-bottom:1.2rem;box-shadow:0 0 36px var(--pc,#4fc3f7)}
+.pi-name{font-family:'Orbitron';font-size:1.5rem;color:var(--pc,#4fc3f7);margin-bottom:.2rem}
+.pi-type{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.4rem}
+.pi-stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.4rem}
+.pi-stat{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;padding:.6rem .7rem}
+.pi-stat .k{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dim)}
+.pi-stat .v{font-family:'Orbitron';font-size:.82rem;margin-top:.2rem}
+.pi-desc{color:var(--muted);font-size:.88rem;line-height:1.75;border-top:1px solid var(--line);padding-top:1.2rem}
+
+/* ═══ TIMELINE (Histoire) ════════════════ */
+.timeline{position:relative;margin-top:2rem}
+.timeline::before{content:'';position:absolute;left:24px;top:0;bottom:0;width:2px;
+  background:linear-gradient(var(--cyan),var(--purple),var(--pink));opacity:.3}
+@media(min-width:780px){.timeline::before{left:50%;transform:translateX(-50%)}}
+.tl-item{position:relative;padding-left:64px;margin-bottom:2.4rem}
+@media(min-width:780px){
+  .tl-item{width:50%;padding-left:0}
+  .tl-item:nth-child(odd){left:0;padding-right:48px;text-align:right}
+  .tl-item:nth-child(even){left:50%;padding-left:48px}
+}
+.tl-dot{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--bg);
+  border:3px solid var(--cyan);left:16px;top:6px;box-shadow:0 0 16px var(--cyan);z-index:2}
+@media(min-width:780px){
+  .tl-item:nth-child(odd) .tl-dot{left:auto;right:-9px}
+  .tl-item:nth-child(even) .tl-dot{left:-9px}
+}
+.tl-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.5rem 1.6rem;
+  backdrop-filter:blur(8px);transition:.35s}
+.tl-card:hover{border-color:rgba(124,220,255,.35);transform:translateY(-3px)}
+.tl-when{font-family:'Orbitron';font-size:.72rem;letter-spacing:.15em;color:var(--gold);text-transform:uppercase;margin-bottom:.5rem}
+.tl-card h3{font-size:1.15rem;margin-bottom:.5rem}
+.tl-card p{color:var(--muted);font-size:.9rem}
+.tl-emoji{font-size:1.6rem;margin-bottom:.6rem;display:block}
+
+/* ═══ GALAXY ═════════════════════════════ */
+#galaxy-stage{position:relative;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  background:radial-gradient(ellipse at center,rgba(14,10,34,.6),rgba(3,4,10,.8));height:min(70vh,620px)}
+#galaxy-canvas{width:100%;height:100%}
+.g-label{position:absolute;font-size:.72rem;letter-spacing:.05em;color:var(--text);pointer-events:none;
+  transform:translate(-50%,-50%);text-shadow:0 0 10px #000;white-space:nowrap;display:flex;align-items:center;gap:.4rem}
+.g-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.g-label.you::before{background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.g-label.core::before{background:var(--pink);box-shadow:0 0 10px var(--pink)}
+.galaxy-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-top:2rem}
+.gf{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.2rem;text-align:center}
+.gf .v{font-family:'Orbitron';font-size:1.3rem;color:var(--purple)}
+.gf .l{font-size:.72rem;color:var(--muted);letter-spacing:.08em;margin-top:.3rem}
+
+/* ═══ EARTH ══════════════════════════════ */
+.earth-track{display:flex;gap:1.2rem;overflow-x:auto;padding:1rem .2rem 2rem;scroll-snap-type:x mandatory}
+.earth-track::-webkit-scrollbar{height:6px}
+.earth-stage{flex:0 0 280px;scroll-snap-align:center;background:var(--panel);border:1px solid var(--line);
+  border-radius:16px;padding:1.6rem;transition:.35s}
+.earth-stage:hover{transform:translateY(-5px);border-color:rgba(124,220,255,.35)}
+.earth-globe{width:90px;height:90px;border-radius:50%;margin-bottom:1.1rem;position:relative;
+  box-shadow:inset -16px -10px 30px rgba(0,0,0,.5),0 0 30px var(--eg,rgba(79,195,247,.3))}
+.earth-when{font-family:'Orbitron';font-size:.7rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:.4rem}
+.earth-stage h3{font-size:1.05rem;margin-bottom:.5rem}
+.earth-stage p{color:var(--muted);font-size:.85rem}
+.earth-hint{font-size:.72rem;color:var(--muted-dim);letter-spacing:.1em;text-align:center;margin-top:.5rem}
+
+/* ═══ SCALE ══════════════════════════════ */
+.scale-viz{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:2.5rem 2rem;backdrop-filter:blur(8px)}
+.scale-stage{display:flex;align-items:flex-end;justify-content:center;gap:2.5rem;min-height:300px;margin-bottom:2rem;flex-wrap:wrap}
+.scale-obj{display:flex;flex-direction:column;align-items:center;gap:.8rem;transition:.5s}
+.scale-circle{border-radius:50%;box-shadow:0 0 30px -4px var(--sc,#4fc3f7);transition:.6s cubic-bezier(.16,1,.3,1)}
+.scale-name{font-family:'Orbitron';font-size:.78rem;letter-spacing:.06em}
+.scale-size{font-size:.72rem;color:var(--muted)}
+.scale-slider-wrap{margin-top:1rem}
+.scale-slider-wrap input{width:100%;height:4px}
+.scale-readout{text-align:center;margin-top:1.5rem}
+.scale-readout .big{font-family:'Orbitron';font-size:1.6rem;color:var(--cyan-bright)}
+.scale-readout .sub{color:var(--muted);font-size:.9rem;margin-top:.3rem;max-width:560px;margin-left:auto;margin-right:auto}
+
+/* ═══ FOOTER ═════════════════════════════ */
+footer{border-top:1px solid var(--line);padding:3rem clamp(1.2rem,5vw,3rem);text-align:center;
+  background:rgba(5,6,15,.6)}
+.foot-brand{font-family:'Orbitron';font-weight:900;letter-spacing:.32em;font-size:1.1rem;margin-bottom:.8rem}
+.foot-brand span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+footer p{color:var(--muted);font-size:.85rem;max-width:560px;margin:0 auto .6rem}
+.foot-note{color:var(--muted-dim);font-size:.72rem;margin-top:1.4rem}
+.foot-links{display:flex;gap:1.5rem;justify-content:center;margin-top:1.2rem;flex-wrap:wrap}
+.foot-links a{font-size:.8rem;color:var(--muted);transition:.25s}
+.foot-links a:hover{color:var(--cyan-bright)}
+
+/* ── Back to top ─────────────────────────── */
+#totop{position:fixed;bottom:1.5rem;right:1.5rem;width:46px;height:46px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.4s;z-index:90;backdrop-filter:blur(8px)}
+#totop.show{opacity:1;pointer-events:auto}
+#totop:hover{border-color:var(--cyan);color:var(--cyan-bright);transform:translateY(-3px)}
+
+/* ── Mobile ──────────────────────────────── */
+@media(max-width:900px){
+  nav{position:fixed;top:0;right:0;height:100vh;width:min(280px,80vw);flex-direction:column;
+    align-items:flex-start;justify-content:center;gap:.4rem;padding:2rem;
+    background:rgba(8,10,22,.97);backdrop-filter:blur(20px);border-left:1px solid var(--line);
+    transform:translateX(100%);transition:transform .4s cubic-bezier(.16,1,.3,1)}
+  nav.open{transform:none}
+  nav a{font-size:1rem;width:100%;padding:.8rem 1rem}
+  .burger{display:flex;z-index:101}
+  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .burger.open span:nth-child(2){opacity:0}
+  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .scale-stage{gap:1.2rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.001s!important}}
+</style>
 </head>
-<body>
-    <!-- Canvas pour Three.js -->
-    <canvas id="canvas-3d"></canvas>
+<body class="no-scroll">
 
-    <!-- Conteneur pour le contenu -->
-    <div id="content-container">
-        
-        <!-- Section Hero avec 3D -->
-        <section id="hero" class="section hero">
-            <div class="hero-content">
-                <h1 class="hero-title" data-parallax="0.5">Bienvenue dans l'Immersion</h1>
-                <p class="hero-subtitle" data-parallax="0.3">Une expérience visuelle révolutionnaire en 3D</p>
-                <button class="cta-button" data-scroll-to="section-2">Explorer</button>
-            </div>
-            <div class="scroll-indicator">
-                <div class="mouse"></div>
-            </div>
-        </section>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">COSMOS</div>
+  <div class="loader-bar"><div class="loader-fill" id="loader-fill"></div></div>
+  <div class="loader-txt" id="loader-txt">Initialisation de l'univers…</div>
+</div>
 
-        <!-- Section 2 - Parallax Background -->
-        <section id="section-2" class="section parallax-section">
-            <div class="parallax-layers">
-                <div class="parallax-layer" data-parallax="0.5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <h2>Parallax Effect</h2>
-                </div>
-                <div class="parallax-layer" data-parallax="0.3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <p>Explorez les profondeurs</p>
-                </div>
-            </div>
-            <div class="section-content">
-                <h2 class="section-title fade-in">Effet Parallax Immersif</h2>
-                <p class="section-text fade-in" style="animation-delay: 0.2s;">
-                    Découvrez comment les couches se déplacent à différentes vitesses pour créer une profondeur visuelle captivante.
-                </p>
-            </div>
-        </section>
+<!-- BACKGROUND -->
+<div id="space-bg"></div>
+<div id="bg-glow"></div>
+<canvas id="bg-canvas" style="position:fixed;inset:0;z-index:-1;pointer-events:none"></canvas>
 
-        <!-- Section 3 - Scroll Animation -->
-        <section id="section-3" class="section scroll-animation-section">
-            <div class="scroll-content">
-                <h2 class="section-title">Animations au Défilement</h2>
-                
-                <div class="scroll-card fade-in-up">
-                    <div class="card-icon">🎨</div>
-                    <h3>Design Fluide</h3>
-                    <p>Des animations qui répondent à votre scroll avec fluidité et élégance.</p>
-                </div>
+<div id="progress"></div>
 
-                <div class="scroll-card fade-in-up" style="animation-delay: 0.2s;">
-                    <div class="card-icon">✨</div>
-                    <h3>Effets Visuels</h3>
-                    <p>Effets de parallax et scroll qui transforment l'expérience utilisateur.</p>
-                </div>
+<!-- HEADER -->
+<header id="header">
+  <a href="#hero" class="brand"><span class="dot"></span><span>COSMOS</span></a>
+  <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  <nav id="nav">
+    <a href="#hero" class="nav-link">Accueil</a>
+    <a href="#decouvrir" class="nav-link">Découvrir</a>
+    <a href="#systeme-solaire" class="nav-link">Système&nbsp;Solaire</a>
+    <a href="#histoire" class="nav-link">Histoire</a>
+    <a href="#galaxie" class="nav-link">Voie&nbsp;Lactée</a>
+    <a href="#terre" class="nav-link">Terre</a>
+    <a href="#echelle" class="nav-link">Échelles</a>
+    <a href="cosmos.html" class="cta">Explorer 3D ↗</a>
+  </nav>
+</header>
 
-                <div class="scroll-card fade-in-up" style="animation-delay: 0.4s;">
-                    <div class="card-icon">🚀</div>
-                    <h3>Performance</h3>
-                    <p>Optimisé pour la vitesse avec une expérience fluide sur tous les appareils.</p>
-                </div>
-            </div>
-        </section>
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-tag">13,8 milliards d'années d'histoire cosmique</div>
+  <h1 class="hero-title">COSMOS</h1>
+  <p class="hero-sub">Un voyage <strong>immersif</strong> à travers l'Univers. Explorez le système solaire en 3D, remontez jusqu'au <strong>Big Bang</strong>, traversez la Voie Lactée et mesurez l'immensité de tout ce qui existe.</p>
+  <div class="hero-btns">
+    <a href="#systeme-solaire" class="btn btn-primary">🪐 Commencer le voyage</a>
+    <a href="cosmos.html" class="btn btn-ghost">Explorateur plein écran ↗</a>
+  </div>
+  <div class="stats reveal" id="hero-stats">
+    <div class="stat"><div class="stat-num" data-target="13.8" data-suffix=" Ga">0</div><div class="stat-lbl">Âge de l'Univers</div></div>
+    <div class="stat"><div class="stat-num" data-target="2000" data-suffix=" Md">0</div><div class="stat-lbl">Galaxies estimées</div></div>
+    <div class="stat"><div class="stat-num" data-target="200" data-suffix="–400 Md">0</div><div class="stat-lbl">Étoiles (Voie Lactée)</div></div>
+    <div class="stat"><div class="stat-num" data-target="8" data-suffix="">0</div><div class="stat-lbl">Planètes du système</div></div>
+  </div>
+  <div class="scroll-cue"><div class="mouse"></div><span>Défiler</span></div>
+</section>
 
-        <!-- Section 4 - 3D Scene -->
-        <section id="section-4" class="section 3d-section">
-            <div class="section-header">
-                <h2 class="section-title">Monde 3D Interactif</h2>
-                <p class="section-subtitle">Interagissez avec la scène 3D en déplaçant votre souris</p>
-            </div>
-            <div id="3d-container" class="3d-container"></div>
-            <div class="section-info">
-                <p>La scène 3D ci-dessus est générée avec Three.js. Elle réagit à vos mouvements de souris pour une expérience immersive.</p>
-            </div>
-        </section>
-
-        <!-- Section 5 - Storytelling -->
-        <section id="section-5" class="section storytelling-section">
-            <div class="storytelling-container">
-                <div class="story-chapter fade-in-left">
-                    <span class="chapter-number">I</span>
-                    <h3>Le Commencement</h3>
-                    <p>Tout commence par une vision, une idée qui prend forme dans l'esprit créatif. Une simple étincelle d'imagination qui deviendra réalité.</p>
-                </div>
-
-                <div class="story-chapter fade-in-right" style="animation-delay: 0.2s;">
-                    <span class="chapter-number">II</span>
-                    <h3>L'Évolution</h3>
-                    <p>De l'idée naît la création. Chaque ligne de code, chaque pixel contribue à bâtir une expérience sans précédent.</p>
-                </div>
-
-                <div class="story-chapter fade-in-left" style="animation-delay: 0.4s;">
-                    <span class="chapter-number">III</span>
-                    <h3>La Transformation</h3>
-                    <p>Ce qui était statique devient vivant. Les animations respirent, les éléments dansent, l'utilisateur est immergé.</p>
-                </div>
-
-                <div class="story-chapter fade-in-right" style="animation-delay: 0.6s;">
-                    <span class="chapter-number">IV</span>
-                    <h3>L'Expérience</h3>
-                    <p>Finalement, c'est l'expérience qui compte. Un voyage à travers les sens, une connexion émotionnelle profonde.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section 6 - Scroll Timeline -->
-        <section id="section-6" class="section timeline-section">
-            <h2 class="section-title">Chronologie Interactive</h2>
-            <div class="timeline">
-                <div class="timeline-item" data-year="2024">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <h4>Lancement</h4>
-                        <p>Le projet commence avec une vision claire et ambitieuse.</p>
-                    </div>
-                </div>
-                <div class="timeline-item" data-year="2025">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <h4>Développement</h4>
-                        <p>Création des animations et effets visuels complexes.</p>
-                    </div>
-                </div>
-                <div class="timeline-item" data-year="2026">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <h4>Perfection</h4>
-                        <p>Optimisation et raffinement de l'expérience utilisateur.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section 7 - Call to Action -->
-        <section id="section-7" class="section cta-section">
-            <div class="cta-container">
-                <h2>Prêt à Créer l'Avenir?</h2>
-                <p>Rejoignez-nous dans cette aventure créative et transformez vos idées en réalité immersive.</p>
-                <button class="cta-button large">Commencer Maintenant</button>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2026 Expérience Immersive. Créé avec passion et technologie.</p>
-        </footer>
+<!-- ═══ DÉCOUVRIR ═══ -->
+<section id="decouvrir">
+  <div class="wrap">
+    <div class="eyebrow reveal">Le voyage</div>
+    <h2 class="section-title reveal">Cinq portails vers <span class="grad-text">l'infini</span></h2>
+    <p class="section-lead reveal">Chaque section est une expérience à part entière. Choisissez votre destination — ou laissez-vous porter de l'atome au cosmos.</p>
+    <div class="portals">
+      <a class="portal reveal d1" style="--c:rgba(79,195,247,.18);--bc:rgba(79,195,247,.4)" href="#systeme-solaire">
+        <div class="portal-ico">🪐</div><h3>Système Solaire 3D</h3>
+        <p>Le Soleil et ses 8 planètes en orbite réelle. Cliquez, explorez, accélérez le temps.</p>
+        <div class="go">Explorer →</div>
+      </a>
+      <a class="portal reveal d2" style="--c:rgba(245,200,66,.16);--bc:rgba(245,200,66,.4)" href="#histoire">
+        <div class="portal-ico">💥</div><h3>Histoire de l'Univers</h3>
+        <p>Du Big Bang aux galaxies modernes : 9 étapes qui ont tout façonné.</p>
+        <div class="go">Remonter le temps →</div>
+      </a>
+      <a class="portal reveal d3" style="--c:rgba(156,108,255,.18);--bc:rgba(156,108,255,.4)" href="#galaxie">
+        <div class="portal-ico">🌌</div><h3>La Voie Lactée</h3>
+        <p>Notre galaxie vue d'en haut : cœur galactique, bras spiraux et Sagittarius A*.</p>
+        <div class="go">Survoler →</div>
+      </a>
+      <a class="portal reveal d1" style="--c:rgba(94,214,160,.16);--bc:rgba(94,214,160,.4)" href="#terre">
+        <div class="portal-ico">🌍</div><h3>Formation de la Terre</h3>
+        <p>4,6 milliards d'années en 10 étapes, de la poussière à l'humanité.</p>
+        <div class="go">Découvrir →</div>
+      </a>
+      <a class="portal reveal d2" style="--c:rgba(255,94,138,.16);--bc:rgba(255,94,138,.4)" href="#echelle">
+        <div class="portal-ico">📏</div><h3>Échelles cosmiques</h3>
+        <p>De l'humain à l'Univers observable : ressentez le vertige des grandeurs.</p>
+        <div class="go">Comparer →</div>
+      </a>
+      <a class="portal reveal d3" style="--c:rgba(127,220,255,.16);--bc:rgba(127,220,255,.4)" href="cosmos.html">
+        <div class="portal-ico">🚀</div><h3>Mode plein écran</h3>
+        <p>L'explorateur 3D complet, sans distraction, en immersion totale.</p>
+        <div class="go">Lancer ↗</div>
+      </a>
     </div>
+  </div>
+</section>
 
-    <!-- Loading Indicator -->
-    <div id="loading-indicator" class="loading-indicator">
-        <div class="loader"></div>
+<!-- ═══ SYSTÈME SOLAIRE ═══ -->
+<section id="systeme-solaire">
+  <div class="wrap">
+    <div class="eyebrow reveal">Expérience 3D · temps réel</div>
+    <h2 class="section-title reveal">Le <span class="grad-text">Système Solaire</span></h2>
+    <p class="section-lead reveal">Faites glisser pour orbiter autour du Soleil. Cliquez sur une planète pour révéler ses secrets. Réglez la vitesse pour voir des années défiler en secondes.</p>
+    <div id="solar-stage" class="reveal">
+      <canvas id="solar-canvas"></canvas>
+      <div class="solar-hint">🖱 Glisser pour pivoter · Cliquer une planète</div>
+      <a href="cosmos.html" class="fs-link">Plein écran ↗</a>
+      <div class="solar-tools">
+        <button class="tool-btn" id="zoom-in" aria-label="Zoom avant">+</button>
+        <button class="tool-btn" id="zoom-out" aria-label="Zoom arrière">−</button>
+        <div class="speed-wrap"><label>Vitesse</label><input type="range" id="solar-speed" min="0" max="5" step="0.1" value="1"></div>
+      </div>
+      <aside id="planet-info">
+        <button class="close" id="pi-close" aria-label="Fermer">✕</button>
+        <canvas class="pi-badge" id="pi-badge" width="84" height="84"></canvas>
+        <div class="pi-name" id="pi-name">Planète</div>
+        <div class="pi-type" id="pi-type">Type</div>
+        <div class="pi-stats" id="pi-stats"></div>
+        <div class="pi-desc" id="pi-desc"></div>
+      </aside>
     </div>
+  </div>
+</section>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="assets/js/utils.js"></script>
-    <script src="assets/js/parallax.js"></script>
-    <script src="assets/js/scrollEffects.js"></script>
-    <script src="assets/js/3d-scene.js"></script>
-    <script src="assets/js/main.js"></script>
+<!-- ═══ HISTOIRE ═══ -->
+<section id="histoire">
+  <div class="wrap">
+    <div class="eyebrow reveal">13,8 milliards d'années</div>
+    <h2 class="section-title reveal">L'histoire de <span class="grad-text">l'Univers</span></h2>
+    <p class="section-lead reveal">Tout a commencé par une singularité plus petite qu'un atome. En une fraction de seconde, l'espace, le temps et la matière sont nés. Voici le récit.</p>
+    <div class="timeline" id="timeline"></div>
+  </div>
+</section>
+
+<!-- ═══ GALAXIE ═══ -->
+<section id="galaxie">
+  <div class="wrap">
+    <div class="eyebrow reveal">Notre quartier cosmique</div>
+    <h2 class="section-title reveal">La <span class="grad-text">Voie Lactée</span></h2>
+    <p class="section-lead reveal">Une galaxie spirale barrée de 100 000 années-lumière de diamètre, contenant des centaines de milliards d'étoiles. Notre Soleil n'en est qu'une, perdue dans le bras d'Orion.</p>
+    <div id="galaxy-stage" class="reveal"><canvas id="galaxy-canvas"></canvas></div>
+    <div class="galaxy-facts">
+      <div class="gf reveal d1"><div class="v">~200–400 Md</div><div class="l">Étoiles</div></div>
+      <div class="gf reveal d2"><div class="v">100 000 al</div><div class="l">Diamètre</div></div>
+      <div class="gf reveal d3"><div class="v">27 000 al</div><div class="l">Soleil → centre</div></div>
+      <div class="gf reveal d4"><div class="v">4,3 M ☉</div><div class="l">Sagittarius A* (trou noir)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TERRE ═══ -->
+<section id="terre">
+  <div class="wrap">
+    <div class="eyebrow reveal">4,6 milliards d'années</div>
+    <h2 class="section-title reveal">La formation de la <span class="grad-text">Terre</span></h2>
+    <p class="section-lead reveal">De la poussière en orbite autour d'un jeune Soleil jusqu'au seul monde connu abritant la vie. Faites défiler horizontalement pour traverser les âges.</p>
+    <div class="earth-track" id="earth-track"></div>
+    <div class="earth-hint reveal">← Faites glisser pour explorer les 10 étapes →</div>
+  </div>
+</section>
+
+<!-- ═══ ÉCHELLE ═══ -->
+<section id="echelle">
+  <div class="wrap">
+    <div class="eyebrow reveal">Le vertige des grandeurs</div>
+    <h2 class="section-title reveal">Échelles <span class="grad-text">cosmiques</span></h2>
+    <p class="section-lead reveal">Notre cerveau n'est pas conçu pour ces nombres. Déplacez le curseur pour voyager de l'échelle humaine jusqu'aux confins de l'Univers observable.</p>
+    <div class="scale-viz reveal">
+      <div class="scale-stage" id="scale-stage"></div>
+      <div class="scale-slider-wrap"><input type="range" id="scale-slider" min="0" max="10" step="1" value="3"></div>
+      <div class="scale-readout">
+        <div class="big" id="scale-name">La Terre</div>
+        <div class="sub" id="scale-desc"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="foot-brand"><span>COSMOS</span></div>
+  <p>Un voyage immersif à travers l'Univers — du Big Bang à aujourd'hui, de l'atome aux galaxies.</p>
+  <div class="foot-links">
+    <a href="#hero">Accueil</a>
+    <a href="#systeme-solaire">Système Solaire</a>
+    <a href="#histoire">Histoire</a>
+    <a href="#galaxie">Voie Lactée</a>
+    <a href="cosmos.html">Explorateur 3D ↗</a>
+  </div>
+  <p class="foot-note">Données astronomiques indicatives · Construit avec Three.js & WebGL · © 2026 COSMOS</p>
+</footer>
+
+<button id="totop" aria-label="Haut de page">↑</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   COSMOS — single-page application
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── DATA ─────────────────────────────────────────────────── */
+const PLANETS = [
+  {name:'Mercure',type:'Planète tellurique',color:'#b5b5b5',c1:'#8c8c8c',c2:'#d0d0d0',emissive:'#1a1a1a',radius:0.42,distance:9,speed:4.15,tilt:0.03,
+   stats:{'Diamètre':'4 879 km','Temp. max':'430 °C','Année':'88 jours','Lunes':'0','Distance ☉':'0,39 UA','Gravité':'3,7 m/s²'},
+   desc:"La plus petite planète et la plus proche du Soleil. Sans atmosphère, elle oscille entre +430 °C le jour et −180 °C la nuit. Sa surface criblée de cratères ressemble à la Lune. Son noyau métallique occupe 85 % de son rayon."},
+  {name:'Vénus',type:'Planète tellurique',color:'#e8c56a',c1:'#d4a017',c2:'#f5deb3',emissive:'#3a2400',radius:0.92,distance:13,speed:3.5,tilt:177,
+   stats:{'Diamètre':'12 104 km','Surface':'465 °C','Année':'225 jours','Lunes':'0','Atmosphère':'96 % CO₂','Pression':'×90 Terre'},
+   desc:"La planète la plus chaude du système solaire à cause d'un effet de serre incontrôlé. Elle tourne à l'envers (rétrograde) et si lentement qu'un jour vénusien dure plus longtemps qu'une année. Brillante, c'est « l'étoile du berger »."},
+  {name:'Terre',type:'Planète habitée',color:'#3a9ad9',c1:'#1a6b3c',c2:'#1e90ff',emissive:'#06210f',radius:1,distance:17.5,speed:2.98,tilt:23.4,
+   stats:{'Diamètre':'12 742 km','Moyenne':'15 °C','Année':'365,25 j','Lunes':'1','Atmosphère':'N₂ 78 % O₂ 21 %','Vie':'Oui ✦'},
+   desc:"Notre maison — le seul monde connu abritant la vie. Eau liquide, champ magnétique protecteur, tectonique des plaques active. Située dans la « zone habitable » à 149,6 millions de km du Soleil. 71 % de sa surface est recouverte d'océans."},
+  {name:'Mars',type:'Planète tellurique',color:'#c1440e',c1:'#8B2500',c2:'#e0623a',emissive:'#2a0a00',radius:0.55,distance:23,speed:2.41,tilt:25.2,
+   stats:{'Diamètre':'6 779 km','Moyenne':'−63 °C','Année':'687 jours','Lunes':'2','Olympus Mons':'21 km','Distance ☉':'1,52 UA'},
+   desc:"La « Planète Rouge » doit sa couleur à l'oxyde de fer. Elle abrite le plus haut volcan (Olympus Mons, 21 km) et le plus long canyon (Valles Marineris, 4 000 km) du système solaire. Elle eut jadis des océans. Cible n°1 de l'exploration humaine."},
+  {name:'Jupiter',type:'Géante gazeuse',color:'#c88b3a',c1:'#9c6b2a',c2:'#f0d6a0',emissive:'#1a1000',radius:3.0,distance:34,speed:1.31,tilt:3.1,banded:true,
+   stats:{'Diamètre':'139 820 km','Nuages':'−110 °C','Année':'12 ans','Lunes':'95','Tache Rouge':'≈16 000 km','Masse':'×318 Terre'},
+   desc:"La géante du système : 1 300 Terres tiendraient dedans. Composée d'hydrogène et d'hélium, elle abrite la Grande Tache Rouge, une tempête vieille de plus de 350 ans. Ses lunes Europe et Ganymède cachent des océans sous la glace."},
+  {name:'Saturne',type:'Géante à anneaux',color:'#e4d191',c1:'#c8a850',c2:'#f5e9b8',emissive:'#1a1500',radius:2.6,distance:45,speed:0.97,tilt:26.7,banded:true,rings:true,
+   stats:{'Diamètre':'116 460 km','Nuages':'−140 °C','Année':'29,5 ans','Lunes':'146','Anneaux':'282 000 km','Densité':'0,69 g/cm³'},
+   desc:"Célèbre pour ses anneaux de glace et de roche, larges de 282 000 km mais épais de quelques dizaines de mètres seulement. Si peu dense qu'elle flotterait sur l'eau. Sa lune Titan possède une atmosphère et des lacs de méthane liquide."},
+  {name:'Uranus',type:'Géante de glace',color:'#7de8e8',c1:'#47d0d0',c2:'#b0f5f5',emissive:'#002020',radius:1.7,distance:55,speed:0.68,tilt:97.8,
+   stats:{'Diamètre':'50 724 km','Minimum':'−224 °C','Année':'84 ans','Lunes':'28','Inclinaison':'97,8°','Distance ☉':'19 UA'},
+   desc:"La planète qui « roule sur le côté » : son axe est incliné à 97,8°, sans doute après une collision géante. Ses pôles font face au Soleil 42 ans d'affilée. Composée d'eau, d'ammoniac et de méthane glacés, elle est la plus froide du système."},
+  {name:'Neptune',type:'Géante de glace',color:'#4b70dd',c1:'#2244cc',c2:'#6e92ff',emissive:'#001030',radius:1.65,distance:64,speed:0.54,tilt:28.3,
+   stats:{'Diamètre':'49 244 km','Nuages':'−214 °C','Année':'165 ans','Lunes':'16','Vents':'2 100 km/h','Distance ☉':'30 UA'},
+   desc:"La planète la plus lointaine, découverte en 1846 par le calcul avant l'observation. Elle subit les vents les plus violents du système solaire (2 100 km/h). Sa lune Triton orbite à l'envers — un objet capturé de la ceinture de Kuiper."}
+];
+
+const SUN = {name:'Le Soleil',type:'Étoile naine jaune · G2V',color:'#ffcc33',
+  stats:{'Diamètre':'1 392 700 km','Surface':'5 500 °C','Cœur':'15 M °C','Âge':'4,6 Ga','Masse':'99,86 % du système','Composition':'H 73 % He 25 %'},
+  desc:"L'étoile centrale qui contient 99,86 % de la masse du système solaire. Sa fusion nucléaire convertit 4 millions de tonnes de matière en énergie chaque seconde. Sa lumière met 8 min 20 s à nous atteindre. Dans ~5 milliards d'années, il deviendra une géante rouge."};
+
+const HISTORY = [
+  {emoji:'💥',when:'t = 0 · il y a 13,8 Ga',title:'Le Big Bang',desc:"Espace, temps et énergie surgissent d'une singularité infiniment dense et chaude. L'Univers commence son expansion."},
+  {emoji:'🌬️',when:'10⁻³² seconde',title:"L'inflation cosmique",desc:"En une fraction de seconde, l'Univers enfle d'un facteur 10²⁶. Cette expansion fulgurante lisse l'espace et sème les futures galaxies."},
+  {emoji:'🔥',when:'10⁻⁶ seconde',title:'La soupe primordiale',desc:"Quarks et gluons se combinent pour former les premiers protons et neutrons dans un plasma à mille milliards de degrés."},
+  {emoji:'⚛️',when:'3 minutes',title:'La nucléosynthèse',desc:"Les premiers noyaux légers se forgent : 75 % d'hydrogène, 25 % d'hélium. Cette recette explique encore la composition de l'Univers."},
+  {emoji:'📡',when:'380 000 ans',title:'La première lumière',desc:"L'Univers refroidit assez pour que les atomes se forment. Il devient transparent et libère le fond diffus cosmologique, encore observable aujourd'hui."},
+  {emoji:'🌑',when:'380 000 ans → 200 Ma',title:'Les âges sombres',desc:"Aucune étoile n'existe encore. L'Univers, empli d'hydrogène neutre, baigne dans une obscurité totale pendant des centaines de millions d'années."},
+  {emoji:'✨',when:'≈ 200 millions d\'ans',title:'Les premières étoiles',desc:"La gravité effondre les nuages de gaz : les étoiles géantes de population III s'allument et rallument la lumière dans le cosmos."},
+  {emoji:'🌌',when:'≈ 1 milliard d\'ans',title:'Les premières galaxies',desc:"Les étoiles s'assemblent en galaxies sous l'effet de la gravité et de la matière noire. Les grandes structures de l'Univers prennent forme."},
+  {emoji:'☀️',when:'il y a 4,6 Ga → aujourd\'hui',title:'Le Soleil & nous',desc:"Dans un bras de la Voie Lactée, un nuage s'effondre et donne naissance au Soleil, aux planètes, puis à la vie. Vous lisez ces lignes."}
+];
+
+const EARTH = [
+  {when:'4,6 Ga',title:'Accrétion',c:'#ff7a3c',c2:'#aa2200',desc:"Poussières et planétésimaux s'agglomèrent autour du jeune Soleil pour former une proto-Terre en fusion."},
+  {when:'4,5 Ga',title:'Collision de Théia',c:'#ff9d5c',c2:'#cc3a00',desc:"Une planète de la taille de Mars percute la Terre. Les débris en orbite se rassemblent et forment la Lune."},
+  {when:'4,5–4,0 Ga',title:'L\'Hadéen',c:'#ff5e3a',c2:'#8a1500',desc:"Un enfer de lave bombardé de météorites. La surface est un océan de magma sous un ciel infernal."},
+  {when:'4,4–4,0 Ga',title:'Les premiers océans',c:'#3aa0d8',c2:'#1a3a6a',desc:"La Terre refroidit, la vapeur se condense en pluies torrentielles. Les premiers océans recouvrent le globe."},
+  {when:'3,8 Ga',title:'Apparition de la vie',c:'#3ac0a0',c2:'#0a4a3a',desc:"Dans les océans, les premières cellules (procaryotes) émergent. La vie prend pied sur Terre."},
+  {when:'2,4 Ga',title:'La Grande Oxydation',c:'#5ed6a0',c2:'#1a5a3a',desc:"Les cyanobactéries libèrent de l'oxygène par photosynthèse. L'atmosphère se transforme radicalement."},
+  {when:'1,5 Ga',title:'Vie multicellulaire',c:'#7de87d',c2:'#2a6a2a',desc:"Les premiers organismes complexes apparaissent. La vie se diversifie et se structure."},
+  {when:'541 Ma',title:'Explosion cambrienne',c:'#9cd84f',c2:'#4a6a1a',desc:"En quelques millions d'années, presque tous les grands groupes animaux apparaissent. La vie explose de diversité."},
+  {when:'230–66 Ma',title:'L\'ère des dinosaures',c:'#c8a850',c2:'#6a4a10',desc:"Les reptiles géants dominent la planète pendant 165 millions d'années, jusqu'à un astéroïde fatal."},
+  {when:'300 000 ans',title:'L\'humanité',c:'#4fc3f7',c2:'#1a4a7a',desc:"Homo sapiens apparaît. En un clin d'œil cosmique, il invente le langage, la science et lève les yeux vers les étoiles."}
+];
+
+const SCALES = [
+  {name:'Un être humain',size:'1,7 m',px:8,color:'#5ed6a0',desc:"Notre échelle de référence. Tout ce qui suit s'en éloigne de façon vertigineuse."},
+  {name:'Le Mont Everest',size:'8 849 m',px:14,color:'#9aa2bd',desc:"Le plus haut sommet terrestre — environ 5 000 fois la taille d'un humain."},
+  {name:'La Lune',size:'3 474 km',px:26,color:'#cfcfcf',desc:"Notre satellite. On pourrait aligner toutes les autres planètes du système solaire entre la Terre et la Lune."},
+  {name:'La Terre',size:'12 742 km',px:48,color:'#4fc3f7',desc:"Notre planète. Une bille bleue de roche et d'eau, la seule connue à abriter la vie."},
+  {name:'Jupiter',size:'139 820 km',px:110,color:'#c88b3a',desc:"La plus grande planète : 11 fois le diamètre de la Terre. 1 300 Terres y tiendraient."},
+  {name:'Le Soleil',size:'1,39 M km',px:200,color:'#ffcc33',desc:"Notre étoile. 109 Terres alignées feraient son diamètre, et 1,3 million de Terres rempliraient son volume."},
+  {name:'Bételgeuse',size:'≈ 1,2 Md km',px:300,color:'#ff5e3a',desc:"Une supergéante rouge. Placée à la place du Soleil, elle engloutirait Mercure, Vénus, la Terre, Mars et Jupiter."},
+  {name:'Le système solaire',size:'≈ 9 Md km',px:340,color:'#9c6cff',desc:"Du Soleil à Neptune. La lumière met plus de 4 heures pour le traverser. Au-delà s'étend le vide interstellaire."},
+  {name:'1 année-lumière',size:'9 461 Md km',px:360,color:'#7fdcff',desc:"La distance parcourue par la lumière en un an. L'étoile la plus proche, Proxima, est à 4,2 années-lumière."},
+  {name:'La Voie Lactée',size:'100 000 al',px:380,color:'#b06cff',desc:"Notre galaxie et ses centaines de milliards d'étoiles. La traverser à la vitesse de la lumière prendrait 100 000 ans."},
+  {name:'L\'Univers observable',size:'93 Md al',px:400,color:'#ff5e8a',desc:"Tout ce que nous pouvons voir : environ 2 000 milliards de galaxies. Au-delà, l'inconnu — peut-être l'infini."}
+];
+
+/* ── UTIL ─────────────────────────────────────────────────── */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return{r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};}
+function lerp(a,b,t){return a+(b-a)*t;}
+function lerpColor(a,b,t){const x=hexToRgb(a),y=hexToRgb(b);return`rgb(${Math.round(lerp(x.r,y.r,t))},${Math.round(lerp(x.g,y.g,t))},${Math.round(lerp(x.b,y.b,t))})`;}
+
+/* ══ GLOBAL STAR BACKGROUND (Three.js) ══════════════════════ */
+let bgScene,bgCam,bgRenderer,bgStars,bgScroll=0;
+function initBg(){
+  const canvas=$('#bg-canvas');
+  bgRenderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  bgRenderer.setSize(innerWidth,innerHeight);
+  bgRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  bgScene=new THREE.Scene();
+  bgCam=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,1,2000);
+  bgCam.position.z=400;
+  const N=2600,g=new THREE.BufferGeometry(),pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  const palette=[[1,1,1],[0.7,0.85,1],[1,0.9,0.75],[0.8,0.7,1],[1,0.75,0.8]];
+  for(let i=0;i<N;i++){
+    const r=300+Math.random()*900,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+    pos[i*3]=r*Math.sin(ph)*Math.cos(th);pos[i*3+1]=r*Math.sin(ph)*Math.sin(th);pos[i*3+2]=r*Math.cos(ph);
+    const c=palette[Math.floor(Math.random()*palette.length)];col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2];
+  }
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  bgStars=new THREE.Points(g,new THREE.PointsMaterial({size:1.6,vertexColors:true,transparent:true,opacity:.9,sizeAttenuation:true}));
+  bgScene.add(bgStars);
+  (function loop(){requestAnimationFrame(loop);
+    bgStars.rotation.y+=0.0004;bgStars.rotation.x+=0.0001;
+    bgCam.position.y=-bgScroll*60;bgCam.lookAt(0,bgCam.position.y,0);
+    bgRenderer.render(bgScene,bgCam);
+  })();
+}
+
+/* ══ SOLAR SYSTEM (Three.js) ════════════════════════════════ */
+let sScene,sCam,sRenderer,sSun,sPlanets=[],sRunning=false,sClock,sSpeed=1;
+let sSph={th:0.6,ph:1.05,r:95},sTarget={th:0.6,ph:1.05,r:95};
+let sRay,sMouse,sDragging=false,sMoved=false,sPrev={x:0,y:0};
+
+function texPlanet(p){
+  const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
+  if(p.banded){
+    for(let b=0;b<14;b++){const y=b/14*256,h=256/14+1,t=Math.abs(Math.sin(b*1.4));
+      x.fillStyle=lerpColor(p.c1,p.c2,t);x.fillRect(0,y,256,h);}
+    for(let i=0;i<120;i++){x.beginPath();x.ellipse(Math.random()*256,Math.random()*256,Math.random()*30+6,Math.random()*4+1,0,0,7);x.fillStyle=`rgba(255,255,255,${Math.random()*0.05})`;x.fill();}
+    if(p.name==='Jupiter'){const gx=140,gy=150;const gr=x.createRadialGradient(gx,gy,0,gx,gy,26);gr.addColorStop(0,'rgba(190,70,30,.95)');gr.addColorStop(1,'rgba(190,70,30,0)');x.beginPath();x.ellipse(gx,gy,26,16,0,0,7);x.fillStyle=gr;x.fill();}
+  }else{
+    const g=x.createLinearGradient(0,0,256,256);g.addColorStop(0,p.c1);g.addColorStop(.5,p.color);g.addColorStop(1,p.c2);
+    x.fillStyle=g;x.fillRect(0,0,256,256);
+    for(let i=0;i<60;i++){const px=Math.random()*256,py=Math.random()*256,r=Math.random()*8+1;
+      const gr=x.createRadialGradient(px,py,0,px,py,r);gr.addColorStop(0,'rgba(0,0,0,.28)');gr.addColorStop(1,'rgba(0,0,0,0)');
+      x.beginPath();x.arc(px,py,r,0,7);x.fillStyle=gr;x.fill();}
+    if(p.name==='Terre'){x.fillStyle='#2d7a3c';[[60,110,34,22],[120,80,44,26],[170,120,40,30],[90,170,30,20],[150,180,38,22]].forEach(([a,b,w,h])=>{x.beginPath();x.ellipse(a,b,w,h,Math.random(),0,7);x.fill();});
+      for(let i=0;i<14;i++){x.beginPath();x.ellipse(Math.random()*256,Math.random()*256,Math.random()*26+8,Math.random()*8+3,0,0,7);x.fillStyle=`rgba(255,255,255,${Math.random()*0.13+0.04})`;x.fill();}}
+  }
+  return new THREE.CanvasTexture(cv);
+}
+function texSun(){
+  const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
+  const g=x.createRadialGradient(128,128,0,128,128,128);
+  g.addColorStop(0,'#fff7c0');g.addColorStop(.4,'#ffd23f');g.addColorStop(.8,'#ff8a00');g.addColorStop(1,'#e44a00');
+  x.fillStyle=g;x.fillRect(0,0,256,256);
+  for(let i=0;i<400;i++){x.beginPath();x.arc(Math.random()*256,Math.random()*256,Math.random()*3,0,7);x.fillStyle=`rgba(255,255,255,${Math.random()*0.12})`;x.fill();}
+  return new THREE.CanvasTexture(cv);
+}
+function initSolar(){
+  const canvas=$('#solar-canvas'),st=$('#solar-stage');
+  const W=st.clientWidth,H=st.clientHeight;
+  sRenderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  sRenderer.setSize(W,H);sRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  sScene=new THREE.Scene();sClock=new THREE.Clock();
+  sCam=new THREE.PerspectiveCamera(55,W/H,0.1,3000);
+  sRay=new THREE.Raycaster();sMouse=new THREE.Vector2();
+  // sun
+  sSun=new THREE.Mesh(new THREE.SphereGeometry(3.4,48,48),new THREE.MeshBasicMaterial({map:texSun()}));
+  sSun.userData={sun:true};sScene.add(sSun);
+  for(let i=0;i<3;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(3.4+0.9*(i+1),32,32),
+    new THREE.MeshBasicMaterial({color:i===0?0xffaa33:i===1?0xff7700:0xff4400,transparent:true,opacity:0.07-i*0.018,side:THREE.BackSide}));sScene.add(m);}
+  const pl=new THREE.PointLight(0xffffff,2.6,600);sScene.add(pl);
+  sScene.add(new THREE.AmbientLight(0x223355,0.45));
+  // planets
+  PLANETS.forEach((p,i)=>{
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.radius,48,48),
+      new THREE.MeshStandardMaterial({map:texPlanet(p),roughness:0.85,metalness:0,emissive:new THREE.Color(p.emissive),emissiveIntensity:0.12}));
+    const a=i/PLANETS.length*Math.PI*2;mesh.position.set(Math.cos(a)*p.distance,0,Math.sin(a)*p.distance);
+    mesh.rotation.z=THREE.MathUtils.degToRad(p.tilt);mesh.userData={idx:i};
+    if(p.rings){const rg=new THREE.Mesh(new THREE.RingGeometry(p.radius*1.5,p.radius*2.6,80),
+      new THREE.MeshBasicMaterial({map:texRing(),side:THREE.DoubleSide,transparent:true,opacity:.85}));
+      rg.rotation.x=Math.PI/2.4;mesh.add(rg);}
+    sScene.add(mesh);
+    // orbit
+    const pts=[];for(let k=0;k<=120;k++){const t=k/120*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(t)*p.distance,0,Math.sin(t)*p.distance));}
+    const ol=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x2a3a66,transparent:true,opacity:.35}));
+    sScene.add(ol);
+    sPlanets.push({mesh,p,angle:a});
+  });
+  // asteroid belt
+  const N=500,ag=new THREE.BufferGeometry(),ap=new Float32Array(N*3);
+  for(let i=0;i<N;i++){const r=27+Math.random()*4,a=Math.random()*Math.PI*2;
+    ap[i*3]=Math.cos(a)*r;ap[i*3+1]=(Math.random()-.5)*0.6;ap[i*3+2]=Math.sin(a)*r;}
+  ag.setAttribute('position',new THREE.BufferAttribute(ap,3));
+  sScene.add(new THREE.Points(ag,new THREE.PointsMaterial({color:0x887766,size:0.14,transparent:true,opacity:.7})));
+  bindSolarEvents();
+  (function loop(){requestAnimationFrame(loop);
+    if(!sRunning)return;
+    const dt=sClock.getDelta();
+    sSph.th+=(sTarget.th-sSph.th)*0.08;sSph.ph+=(sTarget.ph-sSph.ph)*0.08;sSph.r+=(sTarget.r-sSph.r)*0.08;
+    sCam.position.set(sSph.r*Math.sin(sSph.ph)*Math.cos(sSph.th),sSph.r*Math.cos(sSph.ph),sSph.r*Math.sin(sSph.ph)*Math.sin(sSph.th));
+    sCam.lookAt(0,0,0);
+    sSun.rotation.y+=dt*0.1;
+    sPlanets.forEach(o=>{o.angle+=dt*o.p.speed*0.04*sSpeed;
+      o.mesh.position.x=Math.cos(o.angle)*o.p.distance;o.mesh.position.z=Math.sin(o.angle)*o.p.distance;o.mesh.rotation.y+=dt*0.5;});
+    sRenderer.render(sScene,sCam);
+  })();
+}
+function texRing(){const cv=document.createElement('canvas');cv.width=256;cv.height=32;const x=cv.getContext('2d');
+  const g=x.createLinearGradient(0,0,256,0);
+  g.addColorStop(0,'rgba(200,180,120,0)');g.addColorStop(.15,'rgba(210,190,130,.7)');g.addColorStop(.4,'rgba(245,225,160,.9)');
+  g.addColorStop(.55,'rgba(180,160,100,.5)');g.addColorStop(.75,'rgba(225,205,150,.85)');g.addColorStop(1,'rgba(200,180,120,0)');
+  x.fillStyle=g;x.fillRect(0,0,256,32);return new THREE.CanvasTexture(cv);}
+
+function bindSolarEvents(){
+  const canvas=$('#solar-canvas');
+  canvas.addEventListener('pointerdown',e=>{sDragging=true;sMoved=false;sPrev={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',e=>{
+    if(!sDragging)return;const dx=e.clientX-sPrev.x,dy=e.clientY-sPrev.y;
+    if(Math.abs(dx)+Math.abs(dy)>3)sMoved=true;
+    sTarget.th-=dx*0.006;sTarget.ph=Math.max(0.25,Math.min(Math.PI-0.25,sTarget.ph+dy*0.006));
+    sPrev={x:e.clientX,y:e.clientY};});
+  canvas.addEventListener('pointerup',e=>{sDragging=false;if(!sMoved)pickPlanet(e);});
+  $('#zoom-in').onclick=()=>sTarget.r=Math.max(18,sTarget.r-14);
+  $('#zoom-out').onclick=()=>sTarget.r=Math.min(180,sTarget.r+14);
+  $('#solar-speed').addEventListener('input',e=>sSpeed=parseFloat(e.target.value));
+  $('#pi-close').onclick=()=>$('#planet-info').classList.remove('open');
+}
+function pickPlanet(e){
+  const r=$('#solar-canvas').getBoundingClientRect();
+  sMouse.x=((e.clientX-r.left)/r.width)*2-1;sMouse.y=-((e.clientY-r.top)/r.height)*2+1;
+  sRay.setFromCamera(sMouse,sCam);
+  const hits=sRay.intersectObjects([sSun,...sPlanets.map(o=>o.mesh)],true);
+  if(!hits.length)return;
+  let root=hits[0].object;while(root.parent&&root.parent!==sScene)root=root.parent;
+  if(root.userData.sun)return openInfo(SUN,'#ffcc33',null);
+  if(root.userData.idx!==undefined){const p=PLANETS[root.userData.idx];openInfo(p,p.color,p);}
+}
+function openInfo(obj,color,planet){
+  $('#pi-name').textContent=obj.name;$('#pi-name').style.color=color;
+  $('#pi-type').textContent=obj.type;
+  document.documentElement.style.setProperty('--pc',color);
+  $('#planet-info').style.setProperty('--pc',color);
+  drawBadge(planet,color);
+  $('#pi-stats').innerHTML=Object.entries(obj.stats).map(([k,v])=>`<div class="pi-stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  $('#pi-desc').textContent=obj.desc;
+  $('#planet-info').classList.add('open');
+}
+function drawBadge(p,color){
+  const cv=$('#pi-badge'),x=cv.getContext('2d');x.clearRect(0,0,84,84);
+  if(!p){const g=x.createRadialGradient(42,42,0,42,42,42);g.addColorStop(0,'#fff7c0');g.addColorStop(.5,'#ffd23f');g.addColorStop(1,'rgba(255,120,0,0)');
+    x.fillStyle=g;x.beginPath();x.arc(42,42,40,0,7);x.fill();return;}
+  if(p.banded){const clip=new Path2D();clip.arc(42,42,38,0,7);x.save();x.clip(clip);
+    for(let b=0;b<8;b++){x.fillStyle=lerpColor(p.c1,p.c2,Math.abs(Math.sin(b*1.5)));x.fillRect(0,b/8*84,84,84/8+1);}x.restore();}
+  else{const g=x.createRadialGradient(30,30,2,42,42,40);g.addColorStop(0,'#fff');g.addColorStop(.25,p.color);g.addColorStop(1,p.c1);
+    x.beginPath();x.arc(42,42,38,0,7);x.fillStyle=g;x.fill();}
+  if(p.rings){x.save();x.globalAlpha=.7;x.strokeStyle='#d8c070';x.lineWidth=4;x.beginPath();x.ellipse(42,42,48,12,0,Math.PI*0.12,Math.PI*0.88);x.stroke();x.restore();}
+}
+
+/* ══ GALAXY (2D canvas) ════════════════════════════════════ */
+let gCtx,gStars=[],gRot=0,gRunning=false,gW,gH;
+function initGalaxy(){
+  const cv=$('#galaxy-canvas'),st=$('#galaxy-stage');
+  function size(){const ratio=Math.min(devicePixelRatio,2);
+    gW=cv.width=st.clientWidth*ratio;gH=cv.height=st.clientHeight*ratio;
+    cv.style.width=st.clientWidth+'px';cv.style.height=st.clientHeight+'px';}
+  size();gCtx=cv.getContext('2d');
+  const arms=4,starsPerArm=900;
+  gStars=[];
+  for(let a=0;a<arms;a++){
+    for(let i=0;i<starsPerArm;i++){
+      const dist=Math.pow(Math.random(),0.55)*Math.min(gW,gH)*0.46;
+      const armAngle=a/arms*Math.PI*2;
+      const spin=dist*0.012;
+      const spread=(Math.random()-0.5)*0.5*(1-dist/(Math.min(gW,gH)*0.5))+(Math.random()-0.5)*0.12;
+      const angle=armAngle+spin+spread;
+      const tone=Math.random();
+      const col=dist<60?'255,230,180':tone<0.5?'200,220,255':tone<0.8?'255,255,255':'255,210,230';
+      gStars.push({dist,angle,r:Math.random()*1.4+0.3,a:Math.random()*0.6+0.4,col});
+    }
+  }
+  for(let i=0;i<700;i++){const dist=Math.pow(Math.random(),2)*70;const angle=Math.random()*Math.PI*2;
+    gStars.push({dist,angle,r:Math.random()*1.3+0.4,a:Math.random()*0.5+0.5,col:'255,225,170'});}
+  buildGalaxyLabels();
+  (function loop(){requestAnimationFrame(loop);if(!gRunning)return;gRot+=0.0010;draw();})();
+  function draw(){
+    gCtx.clearRect(0,0,gW,gH);
+    const cx=gW/2,cy=gH/2;
+    const cg=gCtx.createRadialGradient(cx,cy,0,cx,cy,160);
+    cg.addColorStop(0,'rgba(255,220,150,0.5)');cg.addColorStop(0.4,'rgba(255,150,80,0.12)');cg.addColorStop(1,'rgba(255,150,80,0)');
+    gCtx.fillStyle=cg;gCtx.fillRect(0,0,gW,gH);
+    for(const s of gStars){
+      const an=s.angle+gRot;const px=cx+Math.cos(an)*s.dist,py=cy+Math.sin(an)*s.dist*0.62;
+      gCtx.beginPath();gCtx.arc(px,py,s.r,0,7);gCtx.fillStyle=`rgba(${s.col},${s.a})`;gCtx.fill();
+    }
+    gCtx.beginPath();gCtx.arc(cx,cy,4,0,7);gCtx.fillStyle='#000';gCtx.fill();
+    gCtx.beginPath();gCtx.arc(cx,cy,5.5,0,7);gCtx.strokeStyle='rgba(255,180,120,.9)';gCtx.lineWidth=1.5;gCtx.stroke();
+    positionGalaxyLabels(cx,cy);
+  }
+  window._galaxyResize=size;
+}
+let gLabels=[];
+function buildGalaxyLabels(){
+  const st=$('#galaxy-stage');
+  const defs=[
+    {cls:'core',txt:'Sagittarius A* — trou noir',dist:0,angle:0,fixed:true,ox:14,oy:-10},
+    {cls:'you',txt:'☀ Vous êtes ici',dist:0.55,angle:-0.6},
+    {cls:'',txt:'Bras de Persée',dist:0.8,angle:2.4},
+    {cls:'',txt:'Bras du Sagittaire',dist:0.62,angle:3.7}
+  ];
+  st.querySelectorAll('.g-label').forEach(e=>e.remove());
+  gLabels=defs.map(d=>{const el=document.createElement('div');el.className='g-label '+d.cls;el.textContent=d.txt;st.appendChild(el);return{el,d};});
+}
+function positionGalaxyLabels(cx,cy){
+  const st=$('#galaxy-stage'),scale=st.clientWidth/gW;
+  const R=Math.min(gW,gH)*0.46;
+  gLabels.forEach(({el,d})=>{
+    let px,py;
+    if(d.fixed){px=cx;py=cy;}
+    else{const an=d.angle+gRot;px=cx+Math.cos(an)*d.dist*R;py=cy+Math.sin(an)*d.dist*R*0.62;}
+    el.style.left=(px*scale+(d.ox||0))+'px';el.style.top=(py*scale+(d.oy||0))+'px';
+  });
+}
+
+/* ══ TIMELINE / EARTH / SCALE (DOM) ════════════════════════ */
+function buildTimeline(){
+  $('#timeline').innerHTML=HISTORY.map(h=>`
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <span class="tl-emoji">${h.emoji}</span>
+        <div class="tl-when">${h.when}</div>
+        <h3>${h.title}</h3>
+        <p>${h.desc}</p>
+      </div>
+    </div>`).join('');
+}
+function buildEarth(){
+  $('#earth-track').innerHTML=EARTH.map(e=>`
+    <div class="earth-stage reveal">
+      <div class="earth-globe" style="background:radial-gradient(circle at 32% 30%,${e.c},${e.c2});--eg:${e.c}66"></div>
+      <div class="earth-when">${e.when}</div>
+      <h3>${e.title}</h3>
+      <p>${e.desc}</p>
+    </div>`).join('');
+}
+function buildScale(){
+  const stage=$('#scale-stage'),slider=$('#scale-slider'),nm=$('#scale-name'),ds=$('#scale-desc');
+  slider.max=SCALES.length-1;
+  function render(idx){
+    idx=+idx;
+    const show=[];for(let k=Math.max(0,idx-1);k<=Math.min(SCALES.length-1,idx+1);k++)show.push(k);
+    const maxW=(stage.clientWidth||600)*0.5;
+    stage.innerHTML=show.map(k=>{const s=SCALES[k];const cur=k===idx;
+      const size=Math.max(8,Math.min(s.px,maxW));
+      return`<div class="scale-obj" style="opacity:${cur?1:.4}">
+        <div class="scale-circle" style="width:${size}px;height:${size}px;background:radial-gradient(circle at 34% 30%,#ffffff33,${s.color});--sc:${s.color}"></div>
+        <div class="scale-name" style="color:${cur?s.color:'var(--muted)'}">${s.name}</div>
+        <div class="scale-size">${s.size}</div></div>`;}).join('');
+    nm.textContent=SCALES[idx].name;nm.style.color=SCALES[idx].color;
+    ds.textContent=SCALES[idx].desc;
+  }
+  slider.addEventListener('input',e=>render(e.target.value));
+  render(slider.value);
+  addEventListener('resize',()=>render(slider.value));
+}
+
+/* ══ SCROLL / NAV / COUNTERS ═══════════════════════════════ */
+function initObservers(){
+  const ro=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.12});
+  $$('.reveal').forEach(el=>ro.observe(el));
+
+  const co=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){animCount(e.target);co.unobserve(e.target);}});},{threshold:0.5});
+  $$('.stat-num').forEach(el=>co.observe(el));
+
+  const solarIO=new IntersectionObserver(es=>es.forEach(e=>sRunning=e.isIntersecting),{threshold:0.05});
+  solarIO.observe($('#systeme-solaire'));
+  const galaxyIO=new IntersectionObserver(es=>es.forEach(e=>{gRunning=e.isIntersecting;}),{threshold:0.05});
+  galaxyIO.observe($('#galaxie'));
+
+  const navIO=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+    const id=e.target.id;$$('.nav-link').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));}});},{threshold:0.3,rootMargin:'-20% 0px -40% 0px'});
+  $$('section').forEach(s=>navIO.observe(s));
+}
+function animCount(el){
+  const target=parseFloat(el.dataset.target),suffix=el.dataset.suffix||'';
+  const dec=target%1!==0?1:0,dur=1400,t0=performance.now();
+  function step(t){const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);
+    let val=target*e;el.textContent=(dec?val.toFixed(1):Math.floor(val).toLocaleString('fr-FR'))+suffix;
+    if(p<1)requestAnimationFrame(step);else el.textContent=(dec?target.toFixed(1):target.toLocaleString('fr-FR'))+suffix;}
+  requestAnimationFrame(step);
+}
+function initChrome(){
+  const header=$('#header'),prog=$('#progress'),totop=$('#totop');
+  addEventListener('scroll',()=>{
+    const sc=scrollY,h=document.body.scrollHeight-innerHeight;
+    bgScroll=sc/innerHeight;
+    header.classList.toggle('scrolled',sc>40);
+    prog.style.width=(h>0?sc/h*100:0)+'%';
+    totop.classList.toggle('show',sc>innerHeight*0.8);
+  },{passive:true});
+  totop.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+  const burger=$('#burger'),nav=$('#nav');
+  burger.onclick=()=>{burger.classList.toggle('open');nav.classList.toggle('open');};
+  $$('#nav a').forEach(a=>a.onclick=()=>{burger.classList.remove('open');nav.classList.remove('open');});
+}
+function onResize(){
+  if(bgRenderer){bgCam.aspect=innerWidth/innerHeight;bgCam.updateProjectionMatrix();bgRenderer.setSize(innerWidth,innerHeight);}
+  if(sRenderer){const st=$('#solar-stage');sCam.aspect=st.clientWidth/st.clientHeight;sCam.updateProjectionMatrix();sRenderer.setSize(st.clientWidth,st.clientHeight);}
+  if(window._galaxyResize)window._galaxyResize();
+}
+
+/* ══ BOOT ══════════════════════════════════════════════════ */
+function boot(){
+  const fill=$('#loader-fill'),txt=$('#loader-txt');
+  const msgs=['Allumage des étoiles…','Mise en orbite des planètes…','Déploiement de la Voie Lactée…','Calibration du Big Bang…'];
+  let p=0,mi=0;
+  const iv=setInterval(()=>{p+=Math.random()*22;fill.style.width=Math.min(p,100)+'%';
+    if(mi<msgs.length&&p>(mi+1)*22)txt.textContent=msgs[mi++];
+    if(p>=100){clearInterval(iv);setTimeout(()=>{$('#loader').classList.add('done');document.body.classList.remove('no-scroll');},400);}
+  },130);
+
+  try{initBg();}catch(e){console.warn('bg',e);}
+  try{initSolar();}catch(e){console.warn('solar',e);}
+  try{initGalaxy();}catch(e){console.warn('galaxy',e);}
+  buildTimeline();buildEarth();buildScale();
+  initObservers();initChrome();
+  addEventListener('resize',onResize);
+}
+addEventListener('load',boot);
+</script>
 </body>
 </html>

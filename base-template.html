@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expérience Immersive 3D</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+</head>
+<body>
+    <!-- Canvas pour Three.js -->
+    <canvas id="canvas-3d"></canvas>
+
+    <!-- Conteneur pour le contenu -->
+    <div id="content-container">
+        
+        <!-- Section Hero avec 3D -->
+        <section id="hero" class="section hero">
+            <div class="hero-content">
+                <h1 class="hero-title" data-parallax="0.5">Bienvenue dans l'Immersion</h1>
+                <p class="hero-subtitle" data-parallax="0.3">Une expérience visuelle révolutionnaire en 3D</p>
+                <button class="cta-button" data-scroll-to="section-2">Explorer</button>
+            </div>
+            <div class="scroll-indicator">
+                <div class="mouse"></div>
+            </div>
+        </section>
+
+        <!-- Section 2 - Parallax Background -->
+        <section id="section-2" class="section parallax-section">
+            <div class="parallax-layers">
+                <div class="parallax-layer" data-parallax="0.5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2>Parallax Effect</h2>
+                </div>
+                <div class="parallax-layer" data-parallax="0.3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <p>Explorez les profondeurs</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <h2 class="section-title fade-in">Effet Parallax Immersif</h2>
+                <p class="section-text fade-in" style="animation-delay: 0.2s;">
+                    Découvrez comment les couches se déplacent à différentes vitesses pour créer une profondeur visuelle captivante.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 3 - Scroll Animation -->
+        <section id="section-3" class="section scroll-animation-section">
+            <div class="scroll-content">
+                <h2 class="section-title">Animations au Défilement</h2>
+                
+                <div class="scroll-card fade-in-up">
+                    <div class="card-icon">🎨</div>
+                    <h3>Design Fluide</h3>
+                    <p>Des animations qui répondent à votre scroll avec fluidité et élégance.</p>
+                </div>
+
+                <div class="scroll-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="card-icon">✨</div>
+                    <h3>Effets Visuels</h3>
+                    <p>Effets de parallax et scroll qui transforment l'expérience utilisateur.</p>
+                </div>
+
+                <div class="scroll-card fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="card-icon">🚀</div>
+                    <h3>Performance</h3>
+                    <p>Optimisé pour la vitesse avec une expérience fluide sur tous les appareils.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4 - 3D Scene -->
+        <section id="section-4" class="section 3d-section">
+            <div class="section-header">
+                <h2 class="section-title">Monde 3D Interactif</h2>
+                <p class="section-subtitle">Interagissez avec la scène 3D en déplaçant votre souris</p>
+            </div>
+            <div id="3d-container" class="3d-container"></div>
+            <div class="section-info">
+                <p>La scène 3D ci-dessus est générée avec Three.js. Elle réagit à vos mouvements de souris pour une expérience immersive.</p>
+            </div>
+        </section>
+
+        <!-- Section 5 - Storytelling -->
+        <section id="section-5" class="section storytelling-section">
+            <div class="storytelling-container">
+                <div class="story-chapter fade-in-left">
+                    <span class="chapter-number">I</span>
+                    <h3>Le Commencement</h3>
+                    <p>Tout commence par une vision, une idée qui prend forme dans l'esprit créatif. Une simple étincelle d'imagination qui deviendra réalité.</p>
+                </div>
+
+                <div class="story-chapter fade-in-right" style="animation-delay: 0.2s;">
+                    <span class="chapter-number">II</span>
+                    <h3>L'Évolution</h3>
+                    <p>De l'idée naît la création. Chaque ligne de code, chaque pixel contribue à bâtir une expérience sans précédent.</p>
+                </div>
+
+                <div class="story-chapter fade-in-left" style="animation-delay: 0.4s;">
+                    <span class="chapter-number">III</span>
+                    <h3>La Transformation</h3>
+                    <p>Ce qui était statique devient vivant. Les animations respirent, les éléments dansent, l'utilisateur est immergé.</p>
+                </div>
+
+                <div class="story-chapter fade-in-right" style="animation-delay: 0.6s;">
+                    <span class="chapter-number">IV</span>
+                    <h3>L'Expérience</h3>
+                    <p>Finalement, c'est l'expérience qui compte. Un voyage à travers les sens, une connexion émotionnelle profonde.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6 - Scroll Timeline -->
+        <section id="section-6" class="section timeline-section">
+            <h2 class="section-title">Chronologie Interactive</h2>
+            <div class="timeline">
+                <div class="timeline-item" data-year="2024">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Lancement</h4>
+                        <p>Le projet commence avec une vision claire et ambitieuse.</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-year="2025">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Développement</h4>
+                        <p>Création des animations et effets visuels complexes.</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-year="2026">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Perfection</h4>
+                        <p>Optimisation et raffinement de l'expérience utilisateur.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7 - Call to Action -->
+        <section id="section-7" class="section cta-section">
+            <div class="cta-container">
+                <h2>Prêt à Créer l'Avenir?</h2>
+                <p>Rejoignez-nous dans cette aventure créative et transformez vos idées en réalité immersive.</p>
+                <button class="cta-button large">Commencer Maintenant</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 Expérience Immersive. Créé avec passion et technologie.</p>
+        </footer>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/parallax.js"></script>
+    <script src="assets/js/scrollEffects.js"></script>
+    <script src="assets/js/3d-scene.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
